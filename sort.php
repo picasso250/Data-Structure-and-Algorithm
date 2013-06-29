@@ -3,34 +3,48 @@
 ini_set('display_errors', true);
 error_reporting(E_ALL | E_STRICT);
 
-// 检验正确性
-for ($i=0; $i < 10; $i++) { 
-    $g = $f = $e = $d = $c = $b = $a = make_random_array(10);
-    sort($a);
-
-    insert_sort($b);
-    assert($a==$b);
-
-    select_sort($c);
-    assert($a==$c);
-
-    merge_sort($d);
-    assert($a==$d);
-
-    quick_sort($e);
-    assert($a==$e);
-
-    heap_sort($f);
-    assert($a==$f);
-
-    $g = quick_sort2($g);
-    assert($a==$g);
+$functions = array(
+    'sort',
+    'array_bubble_sort',
+    'array_insert_sort',
+    'array_select_sort',
+    'array_merge_sort',
+    'array_quick_sort',
+    'array_heap_sort',
+);
+foreach ($functions as $sort_func) {
+    echo "<h2>$sort_func</h2>";
+    foreach (array(100, 1000) as $n) {
+        echo ' ', $n, ' 个元素 ';
+        if ($t = test_sort_func_time($sort_func, $n)) {
+            echo $t, ' ms<hr>';
+        } else {
+            echo 'error<hr>';
+        }
+    }
 }
-$a = array(40, 30, 20, 10, 50,);
+
+/****************************************************************/
+function array_bubble_sort(&$a)
+{
+    $n = count($a);
+    for ($i=0; $i < $n; $i++) {
+        $swap = false;
+        for ($j=$n-1; $j > $i; $j--) {
+            if ($a[$j-1] > $a[$j]) {
+                $swap = true;
+                list($a[$j-1], $a[$j]) = array($a[$j], $a[$j-1]);
+            }
+        }
+        if (!$swap) {
+            return;
+        }
+    }
+}
 
 // 插入排序
 // 假设之前的序列已经有序，将待排元素插入至合适位置
-function insert_sort(&$a)
+function array_insert_sort(&$a)
 {
     $n = count($a);
     for ($i=1; $i < $n; $i++) { // i 是待插入的元素 从 1 到 n-1
@@ -46,7 +60,7 @@ function insert_sort(&$a)
 
 // 选择排序
 // 选出最小的，放入未有序的序列的最前面
-function select_sort(&$a)
+function array_select_sort(&$a)
 {
     $n = count($a);
     $n_1 = $n - 1;
@@ -70,7 +84,7 @@ function select_sort(&$a)
 // 归并排序
 // 将一个序列划分为两个序列，假设这两个数列已经有序
 // 则问题转化为将这两个有序序列归并
-function merge_sort(&$a)
+function array_merge_sort(&$a)
 {
     // 分组
     $n = count($a);
@@ -81,8 +95,8 @@ function merge_sort(&$a)
         $a2 = array_slice($a, $n1);
 
         // 确保有序
-        merge_sort($a1);
-        merge_sort($a2);
+        array_merge_sort($a1);
+        array_merge_sort($a2);
 
         // 归并
         $i = $i1 = $i2 = 0;
@@ -110,41 +124,13 @@ function merge_sort(&$a)
 // 快速排序
 // 找一个基准点，将序列中小于此基准点的全部移到基准点的前面
 // 对前半部分序列和后半部分序列继续运用此策略
-function quick_sort(&$a, $start = 0, $end = null)
-{
-    if ($end === null) {
-        $end = count($a);
-    }
-    if ($start+1 >= $end)
-        return;
-    $p = $start; // 基准点
-    $i = $p + 1;
-    while ($i < $end) {
-        if ($a[$p] > $a[$i]) {
-            // 如果 基准点 大于这个元素
-            // 则将基准点及右侧大的元素整体右移一格
-            $j = $i;
-            $t = $a[$i];
-            while ($j > $p) {
-                $a[$j] = $a[$j-1];
-                $j--;
-            }
-            $a[$p] = $t;
-            $p++;
-        }
-        $i++;
-    }
-    quick_sort($a, $start, $p);
-    quick_sort($a, $p+1, $end);
-}
-
-function quick_sort2($a)
+function array_quick_sort(&$a)
 {
     $n = count($a);
     if ($n <= 1) {
         return $a;
     }
-    $pivot = $a[0];
+    $pivot = $a[0]; // 轴点
     $left = $right = array();
     for ($i=1; $i < $n; $i++) { 
         if ($a[$i] < $pivot) {
@@ -153,45 +139,102 @@ function quick_sort2($a)
             $right[] = $a[$i];
         }
     }
-    return array_merge(quick_sort2($left), array($pivot), quick_sort2($right));
+    return $a = array_merge(array_quick_sort($left), array($pivot), array_quick_sort($right));
 }
+
 
 // 堆排序
 // 构建大顶堆，则首层是最大数，将之移到序列的末尾
-function heap_sort(&$a)
+function array_heap_sort(&$a)
 {
     $n = count($a);
     if ($n <= 1) {
         return;
     }
-    $i = $n-1; // 将大顶与之交换
-    while ($i >= 1) {
-        // 构建大顶堆
-        for ($j=1; $j <= $i; $j++) {
-            // 冒泡至最上层
-            $t = $a[$j];
-            $c_i = $j;
-            $f_i = ceil($j/2) - 1;
-            while ($f_i >= 0 && $a[$f_i] < $t) {
-                $a[$c_i] = $a[$f_i];
-                $c_i = $f_i;
-                $f_i = ceil($f_i/2) - 1;
+
+    // 构建大根堆
+    array_build_heap($a);
+
+    for ($i=$n-1; $i >= 1; $i--) { 
+        // 将最大的数交换到有序列的头部（也就是无序列的尾部）
+        // 然后向下冒泡
+        list($a[0], $a[$i]) = array($a[$i], $a[0]);
+        shift_down($a, $i-1);
+    }
+}
+// 构建大根堆
+function array_build_heap(&$a)
+{
+    $n = count($a);
+    if ($n <= 1) {
+        return;
+    }
+    for ($i=1; $i < $n; $i++) { 
+        // 如果子节点比父节点大，就持续上位
+        $tmp = $a[$i];
+        $j = $i;
+        while ($j > 0) {
+            $f_i = ceil($j/2)-1;
+            if ($tmp > $a[$f_i]) {
+                $a[$j] = $a[$f_i];
+            } else {
+                break;
             }
-            $a[$c_i] = $t;
+            $j = $f_i;
+        }
+        if ($a[$j] < $tmp) {
+            $a[$j] = $tmp;
+        }
+    }
+}
+// 大根堆的向下冒泡
+// 0 -- n
+function shift_down(&$a, $n)
+{
+    $tmp = $a[0];
+    $i = 0;
+    while (true) {
+        // 找出最有潜力的子节点
+        if ($i * 2 + 2 <= $n) {
+            $c_i = $a[$i*2+1] > $a[$i*2+2] ? $i*2+1 : $i*2+2;
+        } elseif ($i * 2 + 1 <= $n) {
+            $c_i = $i*2+1;
+        } else {
+            break; // 到最末了
         }
 
-        // 交换
-        list($a[0], $a[$i]) = array($a[$i], $a[0]);
-        $i--;
+        // 向下冒泡
+        if ($tmp < $a[$c_i]) {
+            $a[$i] = $a[$c_i];
+        } else {
+            break;
+        }
+        $i = $c_i;
+    }
+    if (isset($i) && $tmp < $a[$i]) {
+        $a[$i] = $tmp;
     }
 }
 
-function make_random_array($n)
+function make_random_array($size)
 {
-    for ($i=0; $i < $n; $i++) { 
-        $ret[] = rand();
+    for ($i=0; $i < $size; $i++) { 
+        $a[] = rand();
     }
-    return $ret;
+    return $a;
 }
 
-die('ok');
+function test_sort_func_time($sort_func, $n)
+{
+    $a = make_random_array($n);
+    $b = $a;
+    $t = -microtime(true);
+    $sort_func($a);
+    $t += microtime(true);
+    sort($b);
+    if ($a != $b) {
+        return false;
+    } else {
+        return round($t * 1000, 3); // ms
+    }
+}
