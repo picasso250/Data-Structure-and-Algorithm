@@ -3,6 +3,7 @@
 ini_set('display_errors', true);
 error_reporting(E_ALL | E_STRICT);
 
+// 验证正确性，输出时间性能
 $functions = array(
     'sort',
     'array_bubble_sort',
