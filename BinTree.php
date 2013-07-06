@@ -5,9 +5,9 @@
  */
 class BinTree
 {
-    private $left;
-    private $right;
-    private $data;
+    protected $left;
+    protected $right;
+    protected $data;
 
     public function __construct($data = null, $left = null, $right = null)
     {
