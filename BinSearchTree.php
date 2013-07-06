@@ -34,7 +34,7 @@ class BinSearchTree extends BinTree
         return $this->right->insert($key, $data);
     }
 
-    public function serach($key)
+    public function search($key)
     {
         if ($this->key === null) {
             return false;
