@@ -64,22 +64,14 @@ function array_insert_sort(&$a)
 function array_select_sort(&$a)
 {
     $n = count($a);
-    $n_1 = $n - 1;
-    for ($i=0; $i < $n_1; $i++) { // i 是待交换的
-        $min = $a[$i+1];
-        $min_i = $i+1;
-        for ($j=$i+2; $j < $n; $j++) { 
-            // 选出最小的值
-            if ($a[$j] < $min) {
-                $min = $a[$j];
-                $min_i = $j;
-            }
-        }
-        if ($a[$i] > $a[$min_i]) {
-            // 交换
-            list($a[$i], $a[$min_i]) = array($a[$min_i], $a[$i]);
-        }
+    $ret = array();
+    for ($i=0; $i < $n; $i++) { // i 是待交换的
+        $min = min($a);
+        $index = array_search($min, $a);
+        unset($a[$index]);
+        $ret[] = $min;
     }
+    return $a = $ret;
 }
 
 // 归并排序
