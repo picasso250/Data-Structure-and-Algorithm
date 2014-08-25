@@ -77,7 +77,7 @@ void branch_iter(TrieTree *tree, FILE * out, char *word, char * cp)
         *(cp+1) = 0;
         printf("word %s, count %d\n", word+1, tree->count);
         char buf[MAX_WORD_LENGTH + 10];
-        sprintf(buf, "%s %d", word+1, tree->count);
+        sprintf(buf, "%s %d\n", word+1, tree->count);
         fputs(buf, out);
     }
     if (tree->children == NULL) {
