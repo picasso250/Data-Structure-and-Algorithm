@@ -42,6 +42,7 @@ def build_heap(l):
         l = shift_down(l, i, n)
         i -= 1
     return l
+
 def heap_sort(l):
     l = build_heap(l)
     print('after build',l)
