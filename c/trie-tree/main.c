@@ -71,16 +71,17 @@ void word_iter(TrieTree *tree, char * cp)
 }
 void branch_iter(TrieTree *tree, FILE * out, char *word, char * cp)
 {
+    *cp = tree->char_;
+    // printf("iter %c,\t count %d\n", tree->char_, tree->count);
+    if (tree->count > 0) {
+        *(cp+1) = 0;
+        printf("word %s, count %d\n", word+1, tree->count);
+        char buf[MAX_WORD_LENGTH + 10];
+        sprintf(buf, "%s %d", word+1, tree->count);
+        fputs(buf, out);
+    }
     if (tree->children == NULL) {
         return;
-    }
-    *cp = tree->char_;
-    printf("iter %c\n", tree->char_);
-    if (tree->count > 0) {
-        printf("put %s\n", word);
-        char buf[MAX_WORD_LENGTH + 10];
-        sprintf(buf, "%s %d", word, tree->count);
-        fputs(buf, out);
     }
     int i = 0;
     while (tree->children[i] != NULL) {
